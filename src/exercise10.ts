@@ -1,15 +1,39 @@
-type UserAccount = {};
+import { randomUUID } from "crypto";
+
+export type UserAccount = {
+  id: string;
+  createdAt: Date;
+  email: string;
+  passwordHash: string;
+  profile: {
+    bio: string;
+    avatarUrl: string;
+  };
+};
 
 export class UserRegistry {
-  public registerUser(
-    data: Omit<UserAccount, 'id' | 'createdAt'>,
-  ): UserAccount {
-    return {};
+  private users: Map<string, UserAccount> = new Map();
+
+  public registerUser(data: Omit<UserAccount, 'id' | 'createdAt'>,): UserAccount {
+    const newUser: UserAccount = {
+    id: randomUUID(),
+    createdAt: new Date(),
+      ...data,
+  };
+
+  this.users.set(newUser.id, newUser);
+  return newUser;
   }
 
   public getUserView(
     id: string,
   ): Readonly<Pick<UserAccount, 'id' | 'email' | 'profile'>> | undefined {
-    return undefined;
+    const user = this.users.get(id);
+    if (!user) return undefined;
+    return Object.freeze({
+      id: user.id,
+      email: user.email,
+      profile: user.profile,
+    });
   }
 }
